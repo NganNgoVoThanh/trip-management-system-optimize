@@ -1,11 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/components/ui/use-toast"
-import { Calendar, Clock, MapPin, Users, RefreshCw, Check, X } from "lucide-react"
+import { Calendar, Clock, MapPin, Users, RefreshCw, Check, X, Loader2 } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -15,76 +15,109 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-
-// Dữ liệu mẫu cho các đề xuất tối ưu
-const mockOptimizationProposals = [
-  {
-    id: "opt-1",
-    trips: [
-      {
-        id: "trip-1",
-        user: "Nguyễn Văn A",
-        departureLocation: "Văn phòng HCM",
-        destination: "Nhà máy B",
-        departureDate: "2025-05-05",
-        departureTime: "08:00",
-        originalDepartureTime: "09:00",
-      },
-      {
-        id: "trip-2",
-        user: "Trần Thị B",
-        departureLocation: "Văn phòng HCM",
-        destination: "Nhà máy B",
-        departureDate: "2025-05-05",
-        departureTime: "08:00",
-        originalDepartureTime: "10:00",
-      },
-    ],
-    vehicle: "Xe 4 chỗ",
-    status: "pending",
-    savingEstimate: "500.000 VNĐ",
-  },
-  {
-    id: "opt-2",
-    trips: [
-      {
-        id: "trip-3",
-        user: "Lê Văn C",
-        departureLocation: "Nhà máy A",
-        destination: "Văn phòng Hà Nội",
-        departureDate: "2025-05-10",
-        departureTime: "07:30",
-        originalDepartureTime: "08:30",
-      },
-      {
-        id: "trip-4",
-        user: "Phạm Thị D",
-        departureLocation: "Nhà máy A",
-        destination: "Văn phòng Hà Nội",
-        departureDate: "2025-05-10",
-        departureTime: "07:30",
-        originalDepartureTime: "07:00",
-      },
-      {
-        id: "trip-5",
-        user: "Hoàng Văn E",
-        departureLocation: "Nhà máy A",
-        destination: "Văn phòng Hà Nội",
-        departureDate: "2025-05-10",
-        departureTime: "07:30",
-        originalDepartureTime: "09:00",
-      },
-    ],
-    vehicle: "Xe 7 chỗ",
-    status: "pending",
-    savingEstimate: "1.200.000 VNĐ",
-  },
-]
+import { Trip, OptimizationProposal } from "@/lib/ai-optimizer"
 
 export function TripOptimization() {
   const { toast } = useToast()
-  const [proposals, setProposals] = useState(mockOptimizationProposals)
+  const [proposals, setProposals] = useState<OptimizationProposal[]>([])
   const [isOptimizing, setIsOptimizing] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [trips, setTrips] = useState<Trip[]>([])
+
+  // Load dữ liệu ban đầu
+  useEffect(() => {
+    loadInitialData()
+  }, [])
+
+  const loadInitialData = async () => {
+    try {
+      setIsLoading(true)
+      
+      // Load các chuyến đi hiện có - sử dụng mock data cho demo
+      const mockTrips: Trip[] = [
+        {
+          id: "trip-1",
+          user: "Nguyễn Văn A",
+          email: "nguyen.van.a@company.com",
+          departureLocation: "Văn phòng HCM",
+          destination: "Nhà máy B",
+          departureDate: "2025-05-05",
+          departureTime: "09:00",
+          returnDate: "2025-05-07",
+          returnTime: "17:00",
+          status: "pending",
+          optimized: false,
+        },
+        {
+          id: "trip-2",
+          user: "Trần Thị B",
+          email: "tran.thi.b@company.com",
+          departureLocation: "Văn phòng HCM",
+          destination: "Nhà máy B",
+          departureDate: "2025-05-05",
+          departureTime: "10:00",
+          returnDate: "2025-05-07",
+          returnTime: "17:00",
+          status: "pending",
+          optimized: false,
+        },
+        {
+          id: "trip-3",
+          user: "Lê Văn C",
+          email: "le.van.c@company.com",
+          departureLocation: "Nhà máy A",
+          destination: "Văn phòng Hà Nội",
+          departureDate: "2025-05-10",
+          departureTime: "08:30",
+          returnDate: "2025-05-12",
+          returnTime: "18:30",
+          status: "pending",
+          optimized: false,
+        },
+        {
+          id: "trip-4",
+          user: "Phạm Thị D",
+          email: "pham.thi.d@company.com",
+          departureLocation: "Nhà máy A",
+          destination: "Văn phòng Hà Nội",
+          departureDate: "2025-05-10",
+          departureTime: "07:00",
+          returnDate: "2025-05-12",
+          returnTime: "18:30",
+          status: "pending",
+          optimized: false,
+        },
+        {
+          id: "trip-5",
+          user: "Hoàng Văn E",
+          email: "hoang.van.e@company.com",
+          departureLocation: "Nhà máy A",
+          destination: "Văn phòng Hà Nội",
+          departureDate: "2025-05-10",
+          departureTime: "09:00",
+          returnDate: "2025-05-12",
+          returnTime: "18:30",
+          status: "pending",
+          optimized: false,
+        },
+      ]
+      
+      setTrips(mockTrips)
+      
+      // Load các đề xuất đã có (nếu có) - tạm thời để trống để demo AI optimization
+      setProposals([])
+      
+    } catch (error) {
+      console.error('Lỗi khi tải dữ liệu ban đầu:', error)
+      toast({
+        title: "Lỗi",
+        description: "Không thể tải dữ liệu. Vui lòng thử lại sau.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
@@ -95,42 +128,160 @@ export function TripOptimization() {
     })
   }
 
-  const handleApproveProposal = (proposalId: string) => {
-    setProposals(
-      proposals.map((proposal) => (proposal.id === proposalId ? { ...proposal, status: "approved" } : proposal)),
-    )
-    toast({
-      title: "Đề xuất đã được chấp nhận",
-      description: "Thông báo sẽ được gửi đến người dùng",
-    })
-  }
-
-  const handleRejectProposal = (proposalId: string) => {
-    setProposals(
-      proposals.map((proposal) => (proposal.id === proposalId ? { ...proposal, status: "rejected" } : proposal)),
-    )
-    toast({
-      title: "Đề xuất đã bị từ chối",
-      description: "Các chuyến đi sẽ giữ nguyên lịch trình ban đầu",
-    })
-  }
-
-  const handleRunOptimization = () => {
-    setIsOptimizing(true)
-    setTimeout(() => {
-      setIsOptimizing(false)
-      toast({
-        title: "Tối ưu hóa hoàn tất",
-        description: "Các đề xuất mới đã được tạo",
+  const handleApproveProposal = async (proposalId: string) => {
+    try {
+      // Gọi API để chấp nhận đề xuất
+      const response = await fetch(`/api/proposals/${proposalId}/approve`, {
+        method: 'POST',
       })
-    }, 2000)
+
+      if (!response.ok) {
+        throw new Error('Không thể chấp nhận đề xuất')
+      }
+
+      // Cập nhật state local
+      setProposals(
+        proposals.map((proposal) => 
+          proposal.id === proposalId ? { ...proposal, status: "approved" } : proposal
+        )
+      )
+
+      toast({
+        title: "Đề xuất đã được chấp nhận",
+        description: "Thông báo sẽ được gửi đến người dùng",
+      })
+    } catch (error) {
+      toast({
+        title: "Lỗi",
+        description: "Không thể chấp nhận đề xuất. Vui lòng thử lại.",
+        variant: "destructive",
+      })
+    }
   }
 
-  const handleSendNotifications = (proposalId: string) => {
-    toast({
-      title: "Thông báo đã được gửi",
-      description: "Email đã được gửi đến tất cả người dùng liên quan",
-    })
+  const handleRejectProposal = async (proposalId: string) => {
+    try {
+      // Gọi API để từ chối đề xuất
+      const response = await fetch(`/api/proposals/${proposalId}/reject`, {
+        method: 'POST',
+      })
+
+      if (!response.ok) {
+        throw new Error('Không thể từ chối đề xuất')
+      }
+
+      // Cập nhật state local
+      setProposals(
+        proposals.map((proposal) => 
+          proposal.id === proposalId ? { ...proposal, status: "rejected" } : proposal
+        )
+      )
+
+      toast({
+        title: "Đề xuất đã bị từ chối",
+        description: "Các chuyến đi sẽ giữ nguyên lịch trình ban đầu",
+      })
+    } catch (error) {
+      toast({
+        title: "Lỗi",
+        description: "Không thể từ chối đề xuất. Vui lòng thử lại.",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleRunOptimization = async () => {
+    setIsOptimizing(true)
+    
+    try {
+      // Lọc các chuyến đi chưa được tối ưu
+      const unoptimizedTrips = trips.filter(trip => !trip.optimized)
+      
+      if (unoptimizedTrips.length === 0) {
+        toast({
+          title: "Thông báo",
+          description: "Không có chuyến đi nào cần tối ưu hóa",
+        })
+        return
+      }
+
+      console.log('Gửi yêu cầu tối ưu hóa với các chuyến đi:', unoptimizedTrips)
+
+      const response = await fetch('/api/optimize', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ trips: unoptimizedTrips }),
+      })
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Lỗi khi tối ưu hóa chuyến đi')
+      }
+      
+      const data = await response.json()
+      console.log('Kết quả tối ưu hóa:', data)
+      
+      // Cập nhật state với các đề xuất mới
+      if (data.proposals && Array.isArray(data.proposals)) {
+        setProposals(data.proposals)
+        
+        toast({
+          title: "Tối ưu hóa hoàn tất",
+          description: `Đã tạo ${data.proposals.length} đề xuất mới`,
+        })
+      } else {
+        toast({
+          title: "Không có đề xuất",
+          description: "Không tìm thấy cách tối ưu nào cho các chuyến đi hiện tại",
+        })
+      }
+    } catch (error) {
+      console.error('Lỗi:', error)
+      toast({
+        title: "Đã xảy ra lỗi",
+        description: error instanceof Error ? error.message : "Không thể tối ưu hóa chuyến đi. Vui lòng thử lại sau.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsOptimizing(false)
+    }
+  }
+
+  const handleSendNotifications = async (proposalId: string) => {
+    try {
+      // Gọi API để gửi thông báo
+      const response = await fetch(`/api/proposals/${proposalId}/notify`, {
+        method: 'POST',
+      })
+
+      if (!response.ok) {
+        throw new Error('Không thể gửi thông báo')
+      }
+
+      toast({
+        title: "Thông báo đã được gửi",
+        description: "Email đã được gửi đến tất cả người dùng liên quan",
+      })
+    } catch (error) {
+      toast({
+        title: "Lỗi",
+        description: "Không thể gửi thông báo. Vui lòng thử lại.",
+        variant: "destructive",
+      })
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="flex items-center justify-center py-8">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          <span className="ml-2">Đang tải dữ liệu...</span>
+        </CardContent>
+      </Card>
+    )
   }
 
   return (
@@ -138,12 +289,14 @@ export function TripOptimization() {
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
           <CardTitle>Tối Ưu Hóa Chuyến Đi</CardTitle>
-          <CardDescription>Xem và quản lý các đề xuất tối ưu hóa chuyến đi</CardDescription>
+          <CardDescription>
+            Xem và quản lý các đề xuất tối ưu hóa chuyến đi ({proposals.length} đề xuất)
+          </CardDescription>
         </div>
         <Button onClick={handleRunOptimization} disabled={isOptimizing}>
           {isOptimizing ? (
             <>
-              <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Đang tối ưu...
             </>
           ) : (
@@ -160,6 +313,9 @@ export function TripOptimization() {
             <RefreshCw className="mb-2 h-10 w-10 text-gray-400" />
             <h3 className="mb-1 text-lg font-medium">Không có đề xuất nào</h3>
             <p className="text-sm text-gray-500">Chạy tối ưu hóa để tạo các đề xuất mới</p>
+            <p className="text-sm text-gray-500 mt-1">
+              Hiện có {trips.filter(t => !t.optimized).length} chuyến đi chưa được tối ưu
+            </p>
           </div>
         ) : (
           <div className="space-y-6">
@@ -167,7 +323,9 @@ export function TripOptimization() {
               <div key={proposal.id} className="rounded-lg border p-4 shadow-sm">
                 <div className="mb-4 flex flex-col justify-between gap-2 md:flex-row md:items-center">
                   <div>
-                    <h3 className="text-lg font-medium">Đề xuất gộp {proposal.trips.length} chuyến đi</h3>
+                    <h3 className="text-lg font-medium">
+                      Đề xuất gộp {proposal.trips.length} chuyến đi
+                    </h3>
                     <div className="mt-1 flex items-center gap-2 text-sm text-gray-500">
                       <Calendar className="h-4 w-4" />
                       <span>Ngày: {formatDate(proposal.trips[0].departureDate)}</span>
@@ -181,7 +339,7 @@ export function TripOptimization() {
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    {proposal.status === "pending" ? (
+                    {(!proposal.status || proposal.status === "pending") ? (
                       <>
                         <Button
                           variant="outline"
@@ -237,7 +395,9 @@ export function TripOptimization() {
                               </div>
                             </div>
                             <div className="text-right">
-                              <div className="font-medium text-green-600">Tiết kiệm: {proposal.savingEstimate}</div>
+                              <div className="font-medium text-green-600">
+                                Tiết kiệm: {proposal.savingEstimate}
+                              </div>
                               <div className="text-sm text-gray-500">{proposal.vehicle}</div>
                             </div>
                           </div>
@@ -263,7 +423,7 @@ export function TripOptimization() {
                                         <span className="text-green-600">Không thay đổi</span>
                                       ) : (
                                         <span className="text-amber-600">
-                                          {trip.originalDepartureTime > trip.departureTime ? "Sớm hơn" : "Muộn hơn"}
+                                          {trip.originalDepartureTime! > trip.departureTime ? "Sớm hơn" : "Muộn hơn"}
                                         </span>
                                       )}
                                     </td>
@@ -276,14 +436,12 @@ export function TripOptimization() {
                           <div className="rounded-md bg-blue-50 p-3 dark:bg-blue-900/20">
                             <h4 className="mb-2 font-medium text-blue-700 dark:text-blue-400">Phân tích AI</h4>
                             <p className="text-sm text-blue-700 dark:text-blue-400">
-                              Đề xuất này sẽ giúp tiết kiệm chi phí vận chuyển bằng cách gộp {proposal.trips.length}{" "}
-                              chuyến đi có cùng điểm đi và điểm đến. Thời gian di chuyển trung bình sẽ thay đổi không
-                              đáng kể (±30 phút) cho mỗi người dùng.
+                              {proposal.analysis || `Đề xuất này sẽ giúp tiết kiệm chi phí vận chuyển bằng cách gộp ${proposal.trips.length} chuyến đi có cùng điểm đi và điểm đến. Thời gian di chuyển trung bình sẽ thay đổi không đáng kể (±30 phút) cho mỗi người dùng.`}
                             </p>
                           </div>
                         </div>
                         <DialogFooter>
-                          {proposal.status === "pending" && (
+                          {(!proposal.status || proposal.status === "pending") && (
                             <>
                               <Button
                                 variant="outline"
