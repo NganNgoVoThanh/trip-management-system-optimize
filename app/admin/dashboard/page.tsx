@@ -6,8 +6,8 @@ import { TripManagement } from "@/components/admin/trip-management"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export const metadata: Metadata = {
-  title: "Admin Dashboard | Quản Lý Chuyến Đi",
-  description: "Quản lý và tối ưu hóa chuyến đi",
+  title: "Admin Dashboard | Trip Management System",
+  description: "Manage and optimize trips",
 }
 
 export default function AdminDashboardPage() {
@@ -18,8 +18,8 @@ export default function AdminDashboardPage() {
         <AdminShell>
           <Tabs defaultValue="optimization" className="space-y-4">
             <TabsList>
-              <TabsTrigger value="optimization">Tối Ưu Hóa Chuyến Đi</TabsTrigger>
-              <TabsTrigger value="management">Quản Lý Chuyến Đi</TabsTrigger>
+              <TabsTrigger value="optimization">Trip Optimization</TabsTrigger>
+              <TabsTrigger value="management">Trip Management</TabsTrigger>
             </TabsList>
             <TabsContent value="optimization" className="space-y-4">
               <TripOptimization />
